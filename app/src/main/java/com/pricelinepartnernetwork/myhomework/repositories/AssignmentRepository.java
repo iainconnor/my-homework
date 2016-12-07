@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import static android.R.attr.id;
+
 public class AssignmentRepository extends BaseRepository<Assignment> {
     private static AssignmentRepository instance;
     private List<Assignment> assignments;
@@ -75,6 +77,15 @@ public class AssignmentRepository extends BaseRepository<Assignment> {
         for ( Assignment assignment : assignments ) {
             if ( assignment.getId() == toRemove.getId() ) {
                 assignments.remove(assignment);
+                return;
+            }
+        }
+    }
+
+    public void updateAssigment(Assignment toUpdate) {
+        for ( int i = 0; i < assignments.size(); i++ ) {
+            if ( assignments.get(i).getId() == id ) {
+                assignments.set(i, toUpdate);
                 return;
             }
         }

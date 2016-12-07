@@ -39,6 +39,11 @@ public class CourseAdapter extends BaseAdapter implements SpinnerAdapter {
     }
 
     @Override
+    public boolean hasStableIds() {
+        return true;
+    }
+
+    @Override
     public View getView(int i, View convertView, ViewGroup viewGroup) {
         TextView textView;
         if ( convertView == null || !(convertView instanceof TextView) ) {

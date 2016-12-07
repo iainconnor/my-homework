@@ -87,7 +87,7 @@ public class AddAssignmentActivity extends AppCompatActivity {
             Date convertedDate = null;
             if (!TextUtils.isEmpty(dueDate.getText())) {
                 try {
-                    DateFormat dateFormat = SimpleDateFormat.getDateInstance();
+                    DateFormat dateFormat = SimpleDateFormat.getDateInstance(DateFormat.SHORT);
                     convertedDate = dateFormat.parse(dueDate.getText().toString());
                 } catch (ParseException e) {
                     Snackbar.make(dueDate, "Error, couldn't understand that date.", Snackbar.LENGTH_SHORT).show();
@@ -103,7 +103,7 @@ public class AddAssignmentActivity extends AppCompatActivity {
             AssignmentRepository.instance().addAssignment(assignment);
 
             setResult(Activity.RESULT_OK);
-            finishActivity(CREATE_ASSIGNMENT_REQUEST_CODE);
+            finish();
 
             return true;
         }

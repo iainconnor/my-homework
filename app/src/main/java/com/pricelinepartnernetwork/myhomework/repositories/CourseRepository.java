@@ -23,8 +23,7 @@ public class CourseRepository extends BaseRepository<Course> {
         courses = Arrays.asList(
                 new Course(1, "Math"),
                 new Course(2, "Science"),
-                new Course(3, "Social Studies"),
-                new Course(4, "Computer Programming")
+                new Course(3, "Programming")
         );
     }
 
