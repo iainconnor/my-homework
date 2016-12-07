@@ -26,8 +26,11 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class AddAssignmentActivity extends AppCompatActivity {
-    public static final int CREATE_ASSIGNMENT_REQUEST_CODE = 1;
+public class EditAssignmentActivity extends AppCompatActivity {
+    public static final int EDIT_ASSIGNMENT_REQUEST_CODE = 3;
+    public static final int EDIT_ASSIGNMENT_RESULT_CODE = 1;
+    public static final int DELETE_ASSIGNMENT_RESULT_CODE = 2;
+    public static final String EXTRA_ASSIGNMENT_ID = "assignment_id";
 
     @BindView(R.id.title)
     EditText title;
@@ -39,18 +42,51 @@ public class AddAssignmentActivity extends AppCompatActivity {
     EditText description;
 
     CourseAdapter courseAdapter;
+    Assignment assignment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_assignment);
+        setContentView(R.layout.activity_edit_assigment);
         ButterKnife.bind(this);
 
         courseAdapter = new CourseAdapter();
 
+        long assignmentId;
+        if ( savedInstanceState != null ) {
+            assignmentId = savedInstanceState.getLong(EXTRA_ASSIGNMENT_ID);
+        } else {
+            assignmentId = getIntent().getExtras().getLong(EXTRA_ASSIGNMENT_ID);
+        }
+
+       AssignmentRepository.instance().getById(assignmentId, new BaseRepository.FetchDataCallback<Assignment>() {
+            @Override
+            public void onDataRetrieved(List<Assignment> data) {
+                assignment = data.get(0);
+            }
+
+            @Override
+            public void onError(String error) {
+                Snackbar.make(title, "Could not find that assignment.", Snackbar.LENGTH_SHORT).show();
+                finish();
+            }
+        });
+
         setResult(Activity.RESULT_CANCELED);
 
         setupCourseList();
+        title.setText(assignment.getTitle());
+        if ( assignment.getDueDate() != null ) {
+            DateFormat dateFormat = SimpleDateFormat.getDateInstance(DateFormat.SHORT);
+            dueDate.setText(dateFormat.format(assignment.getDueDate()));
+        }
+        description.setText(assignment.getDescription());
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putLong(EXTRA_ASSIGNMENT_ID, assignment.getId());
+        super.onSaveInstanceState(outState);
     }
 
     private void setupCourseList() {
@@ -60,6 +96,12 @@ public class AddAssignmentActivity extends AppCompatActivity {
             public void onDataRetrieved(List<Course> data) {
                 courseAdapter.setCourses(data);
                 course.setAdapter(courseAdapter);
+
+                for ( int i = 0; i < data.size(); i ++ ) {
+                    if ( data.get(i).equals(assignment.getCourse()) ) {
+                        course.setSelection(i, false);
+                    }
+                }
             }
 
             @Override
@@ -71,14 +113,18 @@ public class AddAssignmentActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.save_menu, menu);
+        getMenuInflater().inflate(R.menu.save_delete_menu, menu);
 
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if ( item.getItemId() == R.id.action_save ) {
+        if ( item.getItemId() == android.R.id.home ) {
+            finish();
+
+            return true;
+        } else if ( item.getItemId() == R.id.action_save ) {
             if (TextUtils.isEmpty(title.getText())) {
                 Snackbar.make(dueDate, "Error, you need a title.", Snackbar.LENGTH_SHORT).show();
                 return false;
@@ -95,19 +141,31 @@ public class AddAssignmentActivity extends AppCompatActivity {
                 }
             }
 
-            Assignment assignment = new Assignment(AssignmentRepository.instance().getNextId(), title.getText().toString());
+            assignment.setTitle(title.getText().toString());
             assignment.setCourse((Course) course.getSelectedItem());
             assignment.setDescription(description.getText().toString());
             assignment.setDueDate(convertedDate);
 
-            AssignmentRepository.instance().addAssignment(assignment);
+            AssignmentRepository.instance().updateAssignment(assignment);
 
-            setResult(Activity.RESULT_OK);
+            setResult(EDIT_ASSIGNMENT_RESULT_CODE);
+            finish();
+
+            return true;
+        } else if ( item.getItemId() == R.id.action_delete ) {
+            AssignmentRepository.instance().removeAssignment(assignment);
+
+            setResult(DELETE_ASSIGNMENT_RESULT_CODE);
             finish();
 
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        finish();
     }
 }

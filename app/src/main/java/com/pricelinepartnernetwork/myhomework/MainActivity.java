@@ -20,7 +20,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AssignmentAdapter.OnEditAssignmentListener {
 
     @BindView(R.id.content_main)
     RecyclerView contentMain;
@@ -51,27 +51,40 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupList() {
-        assignmentAdapter = new AssignmentAdapter();
+        assignmentAdapter = new AssignmentAdapter(this);
         contentMain.setAdapter(assignmentAdapter);
         contentMain.setLayoutManager(new LinearLayoutManager(this));
+
+        refreshData();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if ( requestCode == AddAssignmentActivity.CREATE_ASSIGNMENT_REQUEST_CODE && resultCode == RESULT_OK ) {
-            AssignmentRepository.instance().getAll(new BaseRepository.FetchDataCallback<Assignment>() {
-                @Override
-                public void onDataRetrieved(List<Assignment> data) {
-                    assignmentAdapter.setAssignments(data);
-                }
-
-                @Override
-                public void onError(String error) {
-                    Snackbar.make(contentMain, error, Snackbar.LENGTH_SHORT);
-                }
-            });
+        if ( (requestCode == AddAssignmentActivity.CREATE_ASSIGNMENT_REQUEST_CODE || requestCode == EditAssignmentActivity.EDIT_ASSIGNMENT_REQUEST_CODE) && resultCode == RESULT_OK ) {
+           refreshData();
         }
 
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onEditAssignment(Assignment assignment) {
+        Intent viewAssignmentIntent = new Intent(MainActivity.this, ViewAssignmentActivity.class);
+        viewAssignmentIntent.putExtra(ViewAssignmentActivity.EXTRA_ASSIGNMENT_ID, assignment.getId());
+        startActivityForResult(viewAssignmentIntent, EditAssignmentActivity.EDIT_ASSIGNMENT_REQUEST_CODE);
+    }
+
+    private void refreshData() {
+        AssignmentRepository.instance().getAll(new BaseRepository.FetchDataCallback<Assignment>() {
+            @Override
+            public void onDataRetrieved(List<Assignment> data) {
+                assignmentAdapter.setAssignments(data);
+            }
+
+            @Override
+            public void onError(String error) {
+                Snackbar.make(contentMain, error, Snackbar.LENGTH_SHORT);
+            }
+        });
     }
 }

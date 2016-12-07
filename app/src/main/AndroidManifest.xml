@@ -18,9 +18,25 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".AddAssignmentActivity"
-            android:label="Add Course"
-            android:parentActivityName=".MainActivity" >
+        <activity
+            android:name=".AddAssignmentActivity"
+            android:label="Add Assignment"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+        <activity
+            android:name=".EditAssignmentActivity"
+            android:label="Edit Assignment"
+            android:parentActivityName=".ViewAssignmentActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ViewAssignmentActivity" />
+        </activity>
+        <activity android:name=".ViewAssignmentActivity"
+            android:label="Assignment Details"
+            android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />

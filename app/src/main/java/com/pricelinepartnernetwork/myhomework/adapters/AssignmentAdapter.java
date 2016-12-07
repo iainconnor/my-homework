@@ -22,9 +22,12 @@ import butterknife.ButterKnife;
 
 public class AssignmentAdapter extends RecyclerView.Adapter<AssignmentAdapter.ViewHolder> {
     private List<Assignment> assignments;
+    private OnEditAssignmentListener onEditAssignmentListener;
 
-    public AssignmentAdapter() {
+    public AssignmentAdapter(OnEditAssignmentListener onEditAssignmentListener) {
         assignments = new ArrayList<>();
+        this.onEditAssignmentListener = onEditAssignmentListener;
+
         setHasStableIds(true);
     }
 
@@ -47,7 +50,7 @@ public class AssignmentAdapter extends RecyclerView.Adapter<AssignmentAdapter.Vi
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 assignment.setDone(b);
-                AssignmentRepository.instance().updateAssigment(assignment);
+                AssignmentRepository.instance().updateAssignment(assignment);
             }
         });
 
@@ -62,6 +65,13 @@ public class AssignmentAdapter extends RecyclerView.Adapter<AssignmentAdapter.Vi
         infoStringBuilder.append(assignment.getCourse().getName());
 
         holder.info.setText(infoStringBuilder.toString());
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onEditAssignmentListener.onEditAssignment(assignment);
+            }
+        });
     }
 
     @Override
@@ -86,5 +96,9 @@ public class AssignmentAdapter extends RecyclerView.Adapter<AssignmentAdapter.Vi
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
+    }
+
+    public interface OnEditAssignmentListener {
+        void onEditAssignment(Assignment assignment );
     }
 }
