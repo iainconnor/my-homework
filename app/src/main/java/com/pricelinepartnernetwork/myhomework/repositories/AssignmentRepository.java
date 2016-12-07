@@ -8,9 +8,18 @@ import java.util.Comparator;
 import java.util.List;
 
 public class AssignmentRepository extends BaseRepository<Assignment> {
+    private static AssignmentRepository instance;
     private List<Assignment> assignments;
 
-    public AssignmentRepository() {
+    public static AssignmentRepository instance () {
+        if (instance == null) {
+            instance = new AssignmentRepository();
+        }
+
+        return instance;
+    }
+
+    private AssignmentRepository() {
         assignments = new ArrayList<>();
     }
 
@@ -43,6 +52,19 @@ public class AssignmentRepository extends BaseRepository<Assignment> {
         });
 
         callback.onDataRetrieved(assignments);
+    }
+
+    @Override
+    public long getNextId() {
+        long maxId = 0;
+
+        for ( Assignment assignment : assignments ) {
+            if ( assignment.getId() > maxId ) {
+                maxId = assignment.getId();
+            }
+        }
+
+        return maxId + 1;
     }
 
     public void addAssignment(Assignment assignment) {

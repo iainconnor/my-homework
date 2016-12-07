@@ -9,8 +9,17 @@ import java.util.List;
 
 public class CourseRepository extends BaseRepository<Course> {
     private List<Course> courses;
+    private static CourseRepository instance;
 
-    public CourseRepository() {
+    public static CourseRepository instance() {
+        if ( instance == null ) {
+            instance = new CourseRepository();
+        }
+
+        return instance;
+    }
+
+    private CourseRepository() {
         courses = Arrays.asList(
                 new Course(1, "Math"),
                 new Course(2, "Science"),
@@ -42,5 +51,18 @@ public class CourseRepository extends BaseRepository<Course> {
         });
 
         callback.onDataRetrieved(courses);
+    }
+
+    @Override
+    public long getNextId() {
+        long maxId = 0;
+
+        for ( Course course : courses ) {
+            if ( course.getId() > maxId ) {
+                maxId = course.getId();
+            }
+        }
+
+        return maxId + 1;
     }
 }
